@@ -26,7 +26,6 @@
 
 #include <string.h>
 #include <assert.h>
-#include <stdio.h>
 
 #define ALPHAS                                                                 \
   ['A'] = 1, ['B'] = 1, ['C'] = 1, ['D'] = 1, ['E'] = 1, ['F'] = 1, ['G'] = 1, \
