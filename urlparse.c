@@ -63,7 +63,7 @@ static void urlparse_url_set_field_data(urlparse_url *dest, int field,
   dest->field_data[field].len = (uint16_t)(end - start);
 }
 
-static uint8_t scheme_chars[256] = {
+static const uint8_t scheme_chars[256] = {
   ALPHAS,
   [':'] = 2,
   ['/'] = 3,
@@ -110,7 +110,7 @@ fin:
   return 0;
 }
 
-static uint8_t path_chars[256] = {
+static const uint8_t path_chars[256] = {
   /* unreserved */
   DIGITS,
   ALPHAS,
@@ -195,7 +195,7 @@ fin:
   return 0;
 }
 
-static uint8_t userinfo_chars[256] = {
+static const uint8_t userinfo_chars[256] = {
   /* unreserved */
   DIGITS,
   ALPHAS,
@@ -252,7 +252,7 @@ fin:
   return 0;
 }
 
-static uint8_t host_chars[256] = {
+static const uint8_t host_chars[256] = {
   DIGITS, ALPHAS, ['.'] = 1, ['-'] = 1, [':'] = 2, ['/'] = 2, ['?'] = 2,
 };
 
@@ -285,11 +285,11 @@ static int parse_host(urlparse_parser *up, urlparse_url *dest) {
   return 0;
 }
 
-static uint8_t ipv6_host_chars[256] = {
+static const uint8_t ipv6_host_chars[256] = {
   HEXDIGITS, [':'] = 1, ['.'] = 1, ['%'] = 2, [']'] = 3,
 };
 
-static uint8_t ipv6_zone_chars[256] = {
+static const uint8_t ipv6_zone_chars[256] = {
   DIGITS,    ALPHAS,    ['%'] = 1, ['.'] = 1,
   ['-'] = 1, ['_'] = 1, ['~'] = 1, [']'] = 2,
 };
@@ -356,7 +356,7 @@ fin:
   return 0;
 }
 
-static uint8_t port_chars[256] = {
+static const uint8_t port_chars[256] = {
   DIGITS,
   ['/'] = 2,
   ['?'] = 2,
@@ -478,7 +478,7 @@ static int parse_authority(urlparse_parser *up, urlparse_url *dest) {
   return parse_port(up, dest);
 }
 
-static uint8_t extra_chars[256] = {
+static const uint8_t extra_chars[256] = {
   /* unreserved */
   DIGITS,
   ALPHAS,
