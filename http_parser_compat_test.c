@@ -623,66 +623,38 @@ static const struct url_test url_tests[] =
     },
 };
 
-static void dump_url(const char *url, const urlparse_url *u) {
-  size_t i;
-
-  fprintf(stderr, "\tfield_set: 0x%x, port: %u\n", u->field_set, u->port);
-  for (i = 0; i < URLPARSE_MAX; i++) {
-    if ((u->field_set & (1 << i)) == 0) {
-      fprintf(stderr, "\tfield_data[%zu]: unset\n", i);
-      continue;
-    }
-
-    fprintf(stderr, "\tfield_data[%zu]: off: %u len: %u part: \"%.*s\"\n", i,
-            u->field_data[i].off, u->field_data[i].len, u->field_data[i].len,
-            url + u->field_data[i].off);
-  }
-}
-
 void test_http_parser_compat(void) {
   urlparse_url u;
   const struct url_test *test;
-  size_t i;
+  size_t i, j;
   int rv;
 
   for (i = 0; i < (sizeof(url_tests) / sizeof(url_tests[0])); ++i) {
     test = &url_tests[i];
     memset(&u, 0, sizeof(u));
 
+    munit_log(MUNIT_LOG_INFO, test->name);
+
     rv = urlparse_parse_url(test->url, test->url ? strlen(test->url) : 0,
                             test->is_connect, &u);
 
-    if (test->rv == 0) {
-      if (rv != 0) {
-        fprintf(stderr,
-                "\n*** http_parser_parse_url(\"%s\") \"%s\" test failed, "
-                "unexpected rv %d ***\n\n",
-                test->url, test->name, rv);
+    assert_int(test->rv, ==, rv);
 
-        assert_int(0, ==, rv);
-      }
+    if (test->rv != 0) {
+      continue;
+    }
 
-      if (memcmp(&u, &test->u, sizeof(u)) != 0) {
-        fprintf(stderr,
-                "\n*** http_parser_parse_url(\"%s\") \"%s\" failed ***\n",
-                test->url, test->name);
+    assert_uint16(test->u.field_set, ==, u.field_set);
+    assert_uint16(test->u.port, ==, u.port);
 
-        fprintf(stderr, "target http_parser_url:\n");
-        dump_url(test->url, &test->u);
-        fprintf(stderr, "result http_parser_url:\n");
-        dump_url(test->url, &u);
+    for (j = 0; j < URLPARSE_MAX; ++j) {
+      assert_uint16(test->u.field_data[j].off, ==, u.field_data[j].off);
+      assert_uint16(test->u.field_data[j].len, ==, u.field_data[j].len);
 
-        assert_memory_equal(sizeof(u), &test->u, &u);
-      }
-    } else {
-      /* test->rv != 0 */
-      if (rv == 0) {
-        fprintf(stderr,
-                "\n*** http_parser_parse_url(\"%s\") \"%s\" test failed, "
-                "unexpected rv %d ***\n\n",
-                test->url, test->name, rv);
-
-        assert_int(test->rv, ==, rv);
+      if (test->u.field_set & (1 << j)) {
+        assert_memory_equal(test->u.field_data[j].len,
+                            &test->url[test->u.field_data[j].off],
+                            &test->url[u.field_data[j].off]);
       }
     }
   }
